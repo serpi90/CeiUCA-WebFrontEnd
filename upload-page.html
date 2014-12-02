@@ -1,0 +1,98 @@
+<div class="container">
+	<h1>Subir archivo</h1>
+	<form
+		class="well form"
+		enctype="multipart/form-data"
+		id="fileUploadForm"
+		method="post"
+		name="fileUploadForm"
+		role="form"
+		action="#"	
+		ng-controller="UploadFormController as uploadForm">
+		<div class="form-group">
+			<select required
+				class="form-control"
+				name="subject"
+				title="Materias"
+				ng-model="uploadForm.subject"
+				ng-options="subject.name group by subject.career.name for subject in cei.subjects track by subject.id">
+				<option value="" disabled>Seleccione Materia</option>
+			</select>
+		</div>
+		<div class="form-group">	
+			<input
+				class="form-control"
+				name="file"
+				type="file"
+				ng-model="uploadForm.file.data" 
+				valid-file
+				required/>
+		</div>
+		<div class="form-group">
+			<select required
+				class="form-control"
+				ng-change="uploadForm.updateActionUrl()"
+				ng-model="uploadForm.file.type"
+				ng-options="option for option in ['Examen', 'Apunte']">
+				<option value="" disabled>Seleccione tipo de archivo</option>
+			</select>
+		</div>
+		<span ng-show="uploadForm.file.isExam()">
+			<div class="form-group">
+				<label for="call">Año: </label>
+				<input
+					class="form-control"
+					name="year"
+					max="{{uploadForm.currentYear()}}"
+					type="number"
+					ng-model="uploadForm.exam.year"
+					ng-required="uploadForm.file.isExam()"/>
+			</div>
+			<div class="form-group">
+				<select
+					class="form-control"
+					name="turn"
+					ng-change="uploadForm.exam.clearCall()"
+					ng-model="uploadForm.exam.type"
+					ng-required="uploadForm.file.isExam()">
+					<option value="" disabled>Seleccione tipo de examen</option>
+					<option value="{{type.value}}" ng-repeat="type in uploadForm.examTypes">{{type.name}}</option>
+				</select>
+			</div>
+			<div class="form-group" ng-show="uploadForm.exam.isFinal()">
+				<select
+					class="form-control"
+					name="turn"
+					ng-change="uploadForm.exam.clearCall()"
+					ng-model="uploadForm.exam.turn"
+					ng-options="turn.name for turn in uploadForm.examTurns track by turn.value"
+					ng-required="uploadForm.exam.isFinal()">
+					<option value="" disabled>Seleccione fecha de examen</option>
+				</select>
+			</div>
+			<div class="form-group" ng-show="uploadForm.exam.isRegularFinal()">
+				<select
+					class="form-control"
+					name="call"
+					ng-model="uploadForm.exam.call"
+					ng-options="option for option in [1,2]"
+					ng-required="uploadForm.exam.isRegularFinal()">
+					<option value="" disabled>Seleccione llamado</option>
+				</select>
+			</div>
+			<div class="form-group" ng-show="uploadForm.exam.isMidtermExam()">
+				<label for="call">Numero: </label>
+				<input
+					class="form-control"
+					name="call"
+					min="1"
+					type="number"
+					ng-model="uploadForm.exam.call"
+					ng-required="uploadForm.exam.isMidtermExam()"/>
+			</div>
+		</span>
+		<div class="form-group">
+			<input class="form-control" type="submit" ng-disabled="!(fileUploadForm.$valid)"/>
+		</div>
+	</form>
+</div>

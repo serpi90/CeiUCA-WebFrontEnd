@@ -1,0 +1,38 @@
+<div class="container">
+	<h1>Examenes</h1>
+	<div class="row well">
+		<select
+			ng-model="cei.subject"
+			class="form-control"
+			ng-change="cei.getExams(cei.subject)"
+			ng-options="subject.name group by subject.career.name for subject in cei.subjects track by subject.id"
+			title="Materias">
+			<option value="" disabled>Seleccione Materia</option>
+		</select>
+	</div>
+	<div class="row">
+		<div ng-show="cei.subject && !cei.haveExams(cei.subject)">
+			<div class="alert alert-info">No hay Examenes</div>
+		</div>
+		<div ng-show="cei.subject && cei.haveExams(cei.subject)" class='panel panel-default'>
+			<table class="table table-striped">
+				<tr>
+					<th class="exam-year">Año:</th>
+					<th class="exam-type">Tipo:</th>
+					<th class="exam-date">Fecha:</th>
+					<th class="download">Descarga</td>
+				</tr>
+				<tr ng-repeat="exam in cei.exams[cei.subject.id]">
+					<td>{{exam.year}}</td>
+					<td>{{cei.typeOf(exam)}}</td>
+					<td>{{cei.dateOf(exam)}}</td>
+					<td>
+						<a href="{{cei.backend}}/Examen?id={{exam.id}}">
+							<download-label></download-label>
+						</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

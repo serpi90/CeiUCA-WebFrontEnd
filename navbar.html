@@ -1,0 +1,27 @@
+<nav class="navbar navbar-inverse" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">CeiUCA</a>
+		</div>
+		<div class="collapse navbar-collapse" id="navbar">
+
+			<ul class="nav navbar-nav">
+				<li ng-class="{active:nav.isSelected(1)}">
+					<a href="#" ng-click="nav.selectTab(1)">Examenes</a>
+				</li>
+				<li ng-class="{active:nav.isSelected(2)}">
+					<a href="#" ng-click="nav.selectTab(2)">Apuntes</a>
+				</li>
+				<li ng-class="{active:nav.isSelected(3)}">
+					<a href="#" ng-click="nav.selectTab(3)">Subir Archivos</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</nav>
