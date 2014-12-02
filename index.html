@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Julian Maestri">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="app.css">
+</head>
+<body ng-app="cei" ng-controller="NavController as nav">
+	<nav class="navbar navbar-inverse" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">CeiUCA</a>
+			</div>
+			<div class="collapse navbar-collapse" id="navbar">
+
+				<ul class="nav navbar-nav">
+					<li ng-class="{active:nav.isSelected(1)}">
+						<a href="#" ng-click="nav.selectTab(1)">Examenes</a>
+					</li>
+					<li ng-class="{active:nav.isSelected(2)}">
+						<a href="#" ng-click="nav.selectTab(2)">Apuntes</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<section ng-controller="CeiController as cei" ng-show="nav.isSelected(1)" ng-init="cei.getSubjects()">
+		<div class="container">
+			<h1>Examenes</h1>
+			<div class="row well">
+				<select ng-model="cei.subject" class="form-control" ng-change="cei.getExams(cei.subject)" ng-options="subject.name group by subject.career.name for subject in cei.subjects track by subject.id"  title="Materias">
+					<option value="" disabled>Seleccione Materia</option>
+				</select>
+			</div>
+			<div class="row">
+			<div ng-show="cei.subject && !cei.exams[cei.subject.id].length">
+				<div class="alert alert-info">No hay Examenes</div>
+			</div>
+			<div ng-show="cei.subject && cei.exams[cei.subject.id].length" class='panel panel-default'>
+				<table class="table table-striped">
+					<tr>
+						<th class="exam-year">Año:</th>
+						<th class="exam-type">Tipo:</th>
+						<th class="exam-date">Fecha:</th>
+						<th class="download">Descarga</td>
+					</tr>
+					<tr ng-repeat="exam in cei.exams[cei.subject.id]">
+						<td>{{exam.year}}</td>
+						<td>{{cei.typeOf(exam)}}</td>
+						<td>{{cei.dateOf(exam)}}</td>
+						<td>
+							<a href="{{cei.backend}}/Examen?id={{exam.id}}">
+								<span class="label label-default">
+									<span class="glyphicon glyphicon-cloud-download"> </span> Descarga
+								</span>
+							</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		</div>
+	</section>
+	<section ng-controller="CeiController as cei" ng-show="nav.isSelected(2)" ng-init="cei.getSubjects()">
+		<div class="container">
+			<h1>Apuntes</h1>
+			<div class="row well">
+				<select ng-model="cei.subject" class="form-control" ng-change="cei.getNotes(cei.subject)" ng-options="subject.name group by subject.career.name for subject in cei.subjects track by subject.id"  title="Materias">
+					<option value="" disabled>Seleccione Materia</option>
+				</select>
+			</div>
+			<div class="row">
+			<div ng-show="cei.subject && !cei.notes[cei.subject.id].length">
+				<div class="alert alert-info">No hay Apuntes</div>
+			</div>
+			<div ng-show="cei.subject && cei.notes[cei.subject.id].length" class='panel panel-default'>
+				<table class="table table-striped">
+					<tr>
+						<th class="note-name">Nombre:</th>
+						<th class="note-type">Tipo:</th>
+						<th class="download">Descarga</td>
+					</tr>
+					<tr ng-repeat="note in cei.notes[cei.subject.id]">
+						<td>{{note.name}}</td>
+						<td>{{note.ext}}</td>
+						<td>
+							<a href="{{cei.backend}}/Apunte?id={{note.id}}">
+								<span class="label label-default">
+									<span class="glyphicon glyphicon-cloud-download"> </span> Descarga
+								</span>
+							</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		</div>
+	</section>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.27/angular.min.js"></script>
+	<script src="app.js"></script>
+</body>
