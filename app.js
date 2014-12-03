@@ -1,9 +1,9 @@
 ﻿(function(){
 	"use strict";
 	var context = {};
-	angular.module('cei', [])
+	angular.module('cei', ['directives'])
 		.controller('NavController', function() {
-			this.tab = 1;
+			this.tab = 3;
 			this.selectTab = function(tab){
 				this.tab = tab;
 			};
@@ -14,6 +14,18 @@
 		.controller('CeiController', ['$http', function($http) {
 			var cei = this;
 			cei.backend = 'http://dotabase.com.ar:81';
+			cei.postExamURL = function() {
+				return cei.backend + "/Examen";
+			};
+			cei.postNoteURL = function() {
+				return cei.backend + "/Apunte";
+			};
+			cei.haveExams = function(subject) {
+				return cei.exams[subject.id].length > 0
+			};
+			cei.haveNotes = function(subject) {
+				return cei.notes[subject.id].length > 0
+			};
 			cei.getSubjects = function( ) {
 				if( typeof cei.subjects === 'undefined' ) {
 					if( typeof context.subjects === 'undefined' ) {
@@ -52,10 +64,7 @@
 			cei.notes = [];
 			cei.typeOf = function(exam) {
 				switch(exam.turn) {
-					case 'Feb':
-					case 'Jul':
-					case 'Dec':
-					case 'SP':
+					case 'Feb': case 'Jul': case 'Dec': case 'SP':
 						return 'Final';
 					case 'Par':
 						return 'Parcial';
@@ -80,16 +89,79 @@
 				};
 				switch( cei.typeOf(exam) ) {
 					case 'Final':
-						if( exam.turn != 'SP' )
+						if( exam.turn != 'SP' ) {
 							return fixDate(exam.turn) + ' ' + exam.call + 'º llamado';
-						else
+						}
+						else {
 							return 'Mesa Expecial';
-					case 'Parcial':
-					case 'Recuperatorio':
+						}
+					case 'Parcial': case 'Recuperatorio':
 						return exam.call + 'º';
 					default:
 						return 'N/A';
 				}
 			};
-		}]);
+		}])
+		.controller('UploadFormController', ['$scope', function($scope) {
+			var formCtrl = this;
+			this.file = {};
+			this.examTypes = [
+				{
+					name: 'Parcial',
+					value: 'partial'
+				}, {
+					name: 'Recuperatorio',
+					value: 'recuperatory'
+				}, {
+					name:'Final',
+					value:'final'
+				}
+			];
+			this.examTurns = [
+				{
+					name: 'Febrero',
+					value: 'february',
+				}, {
+					name: 'Julio',
+					value: 'july'
+				} , {
+					name: 'Diciembre',
+					value: 'december'
+				}, {
+					name: 'Mesa Especial',
+					value: 'special'
+				}
+			];
+			this.exam = {};
+			this.currentYear = function() {
+				return new Date().getFullYear();
+			};
+			this.exam.year = this.currentYear();
+			this.exam.clearCall = function() {
+				this.call = undefined;
+			};
+			this.exam.isFinal = function() {
+				return this.type === 'final';
+			};
+			this.exam.isRegularFinal = function () {
+				return this.isFinal() && ['february', 'july', 'december'].indexOf(this.turn.value) !== -1;
+			};
+			this.exam.isMidtermExam = function() {
+				return ['partial','recuperatory'].indexOf(this.type) !== -1;
+			};
+			this.file.isExam = function(){
+				return this.type === 'Examen';
+			};
+			this.updateActionUrl = function () {
+					$('#fileUploadForm').submit( function() {
+						if(formCtrl.file.isExam()) {
+							$(this).attr('action', $scope.cei.postExamURL());
+						} else {
+							$(this).attr('action', $scope.cei.postNoteURL());
+						}
+					return false;
+				});
+			};
+		}])
+		;
 })();
