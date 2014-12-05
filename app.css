@@ -7,9 +7,9 @@
 .download {
 	width: 7em;
 }
-.ng-dirty.ng-valid {
+/* .ng-dirty.ng-valid {
 	background: #C2F9C2;
 }
 .ng-dirty.ng-valid:nth-child(1..n) {
 	background: #C2F9C2;
-}
+} */

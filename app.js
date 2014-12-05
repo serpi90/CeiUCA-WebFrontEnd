@@ -3,7 +3,7 @@
 	var context = {};
 	angular.module('cei', ['directives'])
 		.controller('NavController', function() {
-			this.tab = 3;
+			this.tab = 1;
 			this.selectTab = function(tab){
 				this.tab = tab;
 			};
@@ -102,10 +102,9 @@
 				}
 			};
 		}])
-		.controller('UploadFormController', ['$scope', function($scope) {
-			var formCtrl = this;
-			this.file = {};
-			this.examTypes = [
+		.controller('UploadFormController', [ '$scope', '$http', function ($scope,$http) {
+			var self = this;
+			self.examTypes = [
 				{
 					name: 'Parcial',
 					value: 'partial'
@@ -117,7 +116,7 @@
 					value:'final'
 				}
 			];
-			this.examTurns = [
+			self.examTurns = [
 				{
 					name: 'Febrero',
 					value: 'february',
@@ -132,36 +131,95 @@
 					value: 'special'
 				}
 			];
-			this.exam = {};
-			this.currentYear = function() {
+			self.currentYear = function() {
 				return new Date().getFullYear();
 			};
-			this.exam.year = this.currentYear();
-			this.exam.clearCall = function() {
-				this.call = undefined;
+			self.clearCall = function() {
+				self.exam.call = 1;
 			};
-			this.exam.isFinal = function() {
-				return this.type === 'final';
+			self.examTypeChanged = function() {
+				if( self.exam.type !== 'final' ) {
+					self.exam.turn = self.exam.type;
+				}
+				self.clearCall();
 			};
-			this.exam.isRegularFinal = function () {
-				return this.isFinal() && ['february', 'july', 'december'].indexOf(this.turn.value) !== -1;
+			self.examTurnChanged = function() {
+				self.exam.turn = self.exam.turn.value;
+				self.clearCall();
 			};
-			this.exam.isMidtermExam = function() {
-				return ['partial','recuperatory'].indexOf(this.type) !== -1;
+			self.examNumberChanged = function() {
+				self.exam.call = parseInt(self.exam.number);
+			}
+			self.reset = function() {
+				self.file = {};
+				self.exam = {};
+				self.exam.year = self.currentYear();
+				self.exam.call = 1;
+				self.subject = undefined;
+				angular.forEach(
+					angular.element("input[type='file']"),
+					function(inputElem) {
+						angular.element(inputElem).val(null);
+					});
+				$scope.files = undefined;
+			}
+			self.isFinal = function() {
+				return self.exam.type === 'final';
 			};
-			this.file.isExam = function(){
-				return this.type === 'Examen';
+			self.isRegularFinal = function () {
+				return self.isFinal() && self.exam.turn && ['february', 'july', 'december'].indexOf(self.exam.turn) !== -1;
 			};
-			this.updateActionUrl = function () {
-					$('#fileUploadForm').submit( function() {
-						if(formCtrl.file.isExam()) {
-							$(this).attr('action', $scope.cei.postExamURL());
-						} else {
-							$(this).attr('action', $scope.cei.postNoteURL());
-						}
-					return false;
-				});
+			self.isMidtermExam = function() {
+				return ['partial','recuperatory'].indexOf(self.exam.type) !== -1;
 			};
+			self.isExam = function(){
+				return self.file.type === 'Examen';
+			};
+			self.actionUrl = function() {
+				if(self.isExam()) {
+					return $scope.cei.postExamURL();
+				} else {
+					return $scope.cei.postNoteURL();
+				}
+			};
+			self.addNoteArguments = function( fd ) {
+				angular.forEach( $scope.files, function( file ) {
+					fd.append('file', file );
+				} );
+				fd.append( 'subject', self.subject.id );
+			};
+			self.addExamArguments = function( fd ) {
+				angular.forEach( $scope.files, function( file ) {
+					fd.append('file', file );
+				} );
+				fd.append( 'subject', self.subject.id );
+				fd.append( 'year', self.exam.year );
+				fd.append( 'turn', self.exam.turn );
+				fd.append( 'call', self.exam.call );
+			};
+			self.upload = function () {
+				var fd = new FormData();
+				self.result = undefined;
+				if( self.isExam() ) {
+					self.addExamArguments( fd );
+				} else {	
+					self.addNoteArguments( fd );
+				}
+				self.uploading = true;
+				$http.post( self.actionUrl(), fd, {
+					transformRequest: angular.identity,
+					headers: {'Content-Type': undefined }
+				}).success( function (data) {
+					self.reset();
+					self.result = data;
+					self.uploading = false;
+				}).error( function (data) {
+					self.uploading = false;
+					self.result = data;
+				})
+				;
+			};
+			self.reset();
 		}])
 		;
 })();

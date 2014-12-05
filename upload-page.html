@@ -1,43 +1,53 @@
-<div class="container">
+<div class="container" ng-controller="UploadFormController as uploadForm">
 	<h1>Subir archivo</h1>
-	<form
+	<form novalidate
 		class="well form"
 		enctype="multipart/form-data"
 		id="fileUploadForm"
-		method="post"
 		name="fileUploadForm"
 		role="form"
-		action="#"	
-		ng-controller="UploadFormController as uploadForm">
+		ng-submit="uploadForm.upload()">
 		<div class="form-group">
-			<select required
+			<select
 				class="form-control"
-				name="subject"
 				title="Materias"
+				name="subject"
+				required
 				ng-model="uploadForm.subject"
-				ng-options="subject.name group by subject.career.name for subject in cei.subjects track by subject.id">
-				<option value="" disabled>Seleccione Materia</option>
+				ng-options="aSubject.name group by aSubject.career.name for aSubject in cei.subjects track by aSubject.id"
+				>
+				<option value="">Seleccione Materia</option>
 			</select>
 		</div>
-		<div class="form-group">	
+		<div class="form-group">
 			<input
 				class="form-control"
+				ng-model="files"
+				file-input="files"
 				name="file"
 				type="file"
-				ng-model="uploadForm.file.data" 
-				valid-file
-				required/>
+				required
+				/>
 		</div>
 		<div class="form-group">
-			<select required
-				class="form-control"
-				ng-change="uploadForm.updateActionUrl()"
-				ng-model="uploadForm.file.type"
-				ng-options="option for option in ['Examen', 'Apunte']">
-				<option value="" disabled>Seleccione tipo de archivo</option>
-			</select>
+			<div>
+				<label class="radio-inline">
+					<input
+					type="radio"
+					ng-model="uploadForm.file.type"
+					value="Examen"
+					ng-required="!uploadForm.file.type"/> Examen
+				</label>
+				<label class="radio-inline">
+					<input
+					type="radio"
+					ng-model="uploadForm.file.type"
+					value="Apunte"
+					ng-required="!uploadForm.file.type"/> Apunte
+				</label>
+			</div>
 		</div>
-		<span ng-show="uploadForm.file.isExam()">
+		<span ng-show="uploadForm.isExam()">
 			<div class="form-group">
 				<label for="call">Año: </label>
 				<input
@@ -46,53 +56,74 @@
 					max="{{uploadForm.currentYear()}}"
 					type="number"
 					ng-model="uploadForm.exam.year"
-					ng-required="uploadForm.file.isExam()"/>
+					ng-required="uploadForm.isExam()"/>
 			</div>
 			<div class="form-group">
 				<select
 					class="form-control"
 					name="turn"
-					ng-change="uploadForm.exam.clearCall()"
+					ng-change="uploadForm.examTypeChanged()"
 					ng-model="uploadForm.exam.type"
-					ng-required="uploadForm.file.isExam()">
+					ng-required="uploadForm.isExam()">
 					<option value="" disabled>Seleccione tipo de examen</option>
 					<option value="{{type.value}}" ng-repeat="type in uploadForm.examTypes">{{type.name}}</option>
 				</select>
 			</div>
-			<div class="form-group" ng-show="uploadForm.exam.isFinal()">
+			<div class="form-group" ng-show="uploadForm.isFinal()">
 				<select
 					class="form-control"
 					name="turn"
-					ng-change="uploadForm.exam.clearCall()"
+					ng-change="uploadForm.examTurnChanged()"
 					ng-model="uploadForm.exam.turn"
 					ng-options="turn.name for turn in uploadForm.examTurns track by turn.value"
-					ng-required="uploadForm.exam.isFinal()">
+					ng-required="uploadForm.isFinal()">
 					<option value="" disabled>Seleccione fecha de examen</option>
 				</select>
 			</div>
-			<div class="form-group" ng-show="uploadForm.exam.isRegularFinal()">
-				<select
-					class="form-control"
+			<div class="form-group" ng-show="uploadForm.isRegularFinal()">
+				<div>
+				<label class="radio-inline">
+					<input
+					type="radio"
 					name="call"
 					ng-model="uploadForm.exam.call"
-					ng-options="option for option in [1,2]"
-					ng-required="uploadForm.exam.isRegularFinal()">
-					<option value="" disabled>Seleccione llamado</option>
-				</select>
+					value="1"
+					selected/> 1º Llamado
+				</label>
+				<label class="radio-inline">
+					<input
+					type="radio"
+					name="call"
+					ng-model="uploadForm.exam.call"
+					value="2"/> 2º Llamado
+				</label>
 			</div>
-			<div class="form-group" ng-show="uploadForm.exam.isMidtermExam()">
+			</div>
+			<div class="form-group" ng-show="uploadForm.isMidtermExam()">
 				<label for="call">Numero: </label>
 				<input
 					class="form-control"
 					name="call"
 					min="1"
 					type="number"
-					ng-model="uploadForm.exam.call"
-					ng-required="uploadForm.exam.isMidtermExam()"/>
+					ng-change="uploadForm.examNumberChanged()"
+					ng-model="uploadForm.exam.number"
+					ng-required="uploadForm.isMidtermExam()"/>
 			</div>
 		</span>
 		<div class="form-group">
-			<input class="form-control" type="submit" ng-disabled="!(fileUploadForm.$valid)"/>
+			<input
+				class="form-control btn"
+				type="submit"
+				ng-disabled="!fileUploadForm.$valid"
+				ng-class="{'btn-danger': !fileUploadForm.$valid , 'btn-success': fileUploadForm.$valid }"
+				/>
 		</div>
 	</form>
+	<div class="alert alert-info" ng-show="uploadForm.uploading">Subiendo</div>
+	<div class="alert alert-success" ng-show="uploadForm.result && uploadForm.result.success">Subido correctamente</div>
+	<div class="alert alert-danger" ng-show="uploadForm.result && !uploadForm.result.success">
+		<p>Error al subir:</p>
+		<p>{{uploadForm.result}}</p>
+	</div>
 </div>
